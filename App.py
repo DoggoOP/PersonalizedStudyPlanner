@@ -2,9 +2,13 @@ import streamlit as st
 import cohere
 import datetime
 import pandas as pd
+import os
+
+# Fetch API key from Streamlit secrets
+cohere_api_key = st.secrets["cohere"]["api_key"]
 
 # Initialize Cohere client
-cohere_client = cohere.Client('BFY1598ea13qck5eW1xLdRQ5vVOuDEPK6IrY6TDW')
+cohere_client = cohere.Client(cohere_api_key)
 
 # Function to generate study plan
 def generate_study_plan(course_load, deadlines, preferences):
