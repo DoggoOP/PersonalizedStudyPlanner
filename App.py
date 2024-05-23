@@ -22,7 +22,13 @@ def generate_study_plan(course_load, deadlines, preferences):
 # Function to parse deadlines
 def parse_deadlines(deadlines):
     deadlines_list = [d.split(':') for d in deadlines.split(',')]
-    return [{'course': d[0].strip(), 'date': d[1].strip()} for d in deadlines_list]
+    parsed_deadlines = []
+    for d in deadlines_list:
+        if len(d) == 2:
+            parsed_deadlines.append({'course': d[0].strip(), 'date': d[1].strip()})
+        else:
+            st.warning(f"Invalid deadline format: {d}. Expected format: 'Course: YYYY-MM-DD'")
+    return parsed_deadlines
 
 # Function to send notification
 def send_notification(message):
@@ -46,14 +52,15 @@ if st.button('Generate Study Plan'):
         
         # Show deadlines in a calendar
         deadlines_data = parse_deadlines(deadlines)
-        df = pd.DataFrame(deadlines_data)
-        st.subheader('Deadlines Calendar')
-        st.write(df)
+        if deadlines_data:
+            df = pd.DataFrame(deadlines_data)
+            st.subheader('Deadlines Calendar')
+            st.write(df)
         
-        # Notify the user of upcoming tasks
-        for deadline in deadlines_data:
-            days_left = (datetime.datetime.strptime(deadline['date'], '%Y-%m-%d') - datetime.datetime.now()).days
-            if days_left <= 3:
-                send_notification(f"Reminder: Only {days_left} days left for {deadline['course']} deadline!")
+            # Notify the user of upcoming tasks
+            for deadline in deadlines_data:
+                days_left = (datetime.datetime.strptime(deadline['date'], '%Y-%m-%d') - datetime.datetime.now()).days
+                if days_left <= 3:
+                    send_notification(f"Reminder: Only {days_left} days left for {deadline['course']} deadline!")
     else:
         st.error('Please fill in all the fields.')
