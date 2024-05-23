@@ -2,10 +2,13 @@ import streamlit as st
 import cohere
 import datetime
 import pandas as pd
-import os
 
 # Fetch API key from Streamlit secrets
-cohere_api_key = st.secrets["cohere"]["api_key"]
+try:
+    cohere_api_key = st.secrets["cohere"]["api_key"]
+except KeyError as e:
+    st.error(f"Missing secret: {e}. Please make sure your Streamlit secrets are configured correctly.")
+    st.stop()
 
 # Initialize Cohere client
 cohere_client = cohere.Client(cohere_api_key)
@@ -54,7 +57,3 @@ if st.button('Generate Study Plan'):
                 send_notification(f"Reminder: Only {days_left} days left for {deadline['course']} deadline!")
     else:
         st.error('Please fill in all the fields.')
-
-# Running the app
-if __name__ == '__main__':
-    st.run()
