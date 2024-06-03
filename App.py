@@ -48,33 +48,6 @@ def dashboard_view(course_load, deadlines, preferences, study_plan, deadlines_da
     st.subheader('📝 Study Plan Summary')
     st.write(study_plan)
 
-# Layout 2: Interactive Chatbot Interface
-def chatbot_view():
-    st.subheader('🤖 Interactive Chatbot Interface')
-    course_load = st.text_input('Enter your courses (e.g., Math, Physics, Chemistry)', '')
-    deadlines = st.text_input('Enter your deadlines (e.g., Math: 2023-05-25, Physics: 2023-05-30)', '')
-    preferences = st.text_input('Enter your personal preferences (e.g., study in the morning, prefer short sessions)', '')
-    
-    if st.button('Generate Study Plan'):
-        if course_load and deadlines and preferences:
-            study_plan = generate_study_plan(course_load, deadlines, preferences)
-            st.subheader('Your Personalized Study Plan:')
-            st.write(study_plan)
-            
-            deadlines_data = parse_deadlines(deadlines)
-            if deadlines_data:
-                df = pd.DataFrame(deadlines_data)
-                st.subheader('📅 Deadlines Calendar')
-                st.dataframe(df)
-                
-                # Notify the user of upcoming tasks
-                for deadline in deadlines_data:
-                    days_left = (datetime.datetime.strptime(deadline['date'], '%Y-%m-%d') - datetime.datetime.now()).days
-                    if days_left <= 3:
-                        send_notification(f"🔔 Reminder: Only {days_left} days left for {deadline['course']} deadline!")
-        else:
-            st.error('Please fill in all the fields.')
-
 # Layout 3: Combined View
 def combined_view(course_load, deadlines, preferences, study_plan, deadlines_data):
     st.subheader('🔄 Visual Timeline and Checklist')
@@ -95,7 +68,7 @@ st.title('📚 Personalized Study Planner')
 st.write('Generate a personalized study plan based on your course load, deadlines, and personal preferences.')
 
 # User selects the view
-view = st.sidebar.selectbox('Select View', ['Dashboard', 'Chatbot', 'Combined'])
+view = st.sidebar.selectbox('Select View', ['Dashboard', 'Combined'])
 
 # Input fields
 st.header('📝 Input Your Information')
@@ -110,9 +83,8 @@ if st.button('Generate Study Plan'):
         
         if view == 'Dashboard':
             dashboard_view(course_load, deadlines, preferences, study_plan, deadlines_data)
-        elif view == 'Chatbot':
-            chatbot_view()
         elif view == 'Combined':
             combined_view(course_load, deadlines, preferences, study_plan, deadlines_data)
     else:
         st.error('Please fill in all the fields.')
+
