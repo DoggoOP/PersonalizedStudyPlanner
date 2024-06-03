@@ -15,8 +15,14 @@ cohere_client = cohere.Client(cohere_api_key)
 
 # Function to generate study plan
 def generate_study_plan(course_load, deadlines, preferences):
-    prompt = f"Generate a study plan for the following courses: {course_load}. Deadlines are: {deadlines}. Preferences are: {preferences}."
-    response = cohere_client.generate(prompt=prompt, max_tokens=300)
+    prompt = f"Generate a detailed study plan for the following courses: {course_load}. " \
+             f"The deadlines are: {deadlines}. The study preferences are: {preferences}."
+    response = cohere_client.generate(
+        model='large',
+        prompt=prompt,
+        max_tokens=300,
+        temperature=0.7
+    )
     return response.generations[0].text
 
 # Function to parse deadlines
@@ -98,7 +104,8 @@ if st.button('Generate Study Plan'):
     if st.session_state.deadlines and preferences:
         course_load = [item['course'] for item in st.session_state.deadlines]
         parsed_deadlines = parse_deadlines(st.session_state.deadlines)
-        study_plan = generate_study_plan(course_load, parsed_deadlines, preferences)
+        deadlines_text = "; ".join([f"{item['course']} by {item['date']}" for item in parsed_deadlines])
+        study_plan = generate_study_plan(", ".join(course_load), deadlines_text, preferences)
         
         if view == 'Dashboard':
             dashboard_view(course_load, parsed_deadlines, preferences, study_plan, parsed_deadlines)
