@@ -59,10 +59,10 @@ def combined_view(course_load, deadlines, preferences, study_plan, deadlines_dat
     for idx, deadline in enumerate(deadlines_data):
         col1, col2 = st.columns([4, 1])
         with col1:
-            st.checkbox(f"{deadline['course']}: {deadline['date']}", key=f'checkbox_{idx}')
+            st.checkbox(f"{deadline['course']}: {deadline['date']}", key=f'checkbox_{idx}', value=False)
         with col2:
             if st.button('Delete', key=f'delete_{idx}'):
-                del st.session_state.deadlines[idx]
+                st.session_state.deadlines.pop(idx)
                 st.experimental_rerun()
 
 # Main app layout
@@ -103,3 +103,4 @@ if st.button('Generate Study Plan'):
 
 # Footer with more info
 st.markdown('---')
+
