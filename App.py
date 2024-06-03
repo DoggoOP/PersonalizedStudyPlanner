@@ -61,42 +61,36 @@ def combined_view(course_load, deadlines, preferences, study_plan, deadlines_dat
 
 # Main app layout
 st.title('📚 Personalized Study Planner')
-st.write('Generate a personalized study plan based on your course load, deadlines, and personal preferences.')
+st.write('Generate a personalized study plan based on your courses, deadlines, and personal preferences.')
 
-# Adding tasks dynamically
-st.header('🗓️ Add Your Deadlines')
-deadlines = []
-if 'deadline_count' not in st.session_state:
-    st.session_state.deadline_count = 0
+# Adding courses and deadlines dynamically
+st.header('🗓️ Add Your Courses and Deadlines')
+courses_and_deadlines = []
+if 'course_count' not in st.session_state:
+    st.session_state.course_count = 0
 
-def add_deadline():
-    st.session_state.deadline_count += 1
+def add_course():
+    st.session_state.course_count += 1
 
-st.button('Add Deadline', on_click=add_deadline)
+st.button('Add Course', on_click=add_course)
 
-for i in range(st.session_state.deadline_count):
-    with st.expander(f'Deadline {i+1}'):
+for i in range(st.session_state.course_count):
+    with st.expander(f'Course {i+1}'):
         course = st.text_input(f'Course Name {i+1}', key=f'course_{i}')
         date = st.date_input(f'Deadline Date {i+1}', key=f'date_{i}')
         if course and date:
-            deadlines.append({'course': course, 'date': date})
+            courses_and_deadlines.append({'course': course, 'date': date})
 
 # Input fields
-st.header('📝 Input Your Information')
+st.header('📝 Input Your Study Preferences')
 preferences = st.text_area('Personal Preferences (e.g., study in the morning, prefer short sessions)', placeholder='Enter any study preferences')
 
-# User selects the view
-view = st.sidebar.selectbox('Select View', ['Dashboard', 'Combined'])
-
 if st.button('Generate Study Plan'):
-    if course_load and deadlines and preferences:
-        parsed_deadlines = parse_deadlines(deadlines)
+    if courses_and_deadlines and preferences:
+        course_load = [item['course'] for item in courses_and_deadlines]
+        parsed_deadlines = parse_deadlines(courses_and_deadlines)
         study_plan = generate_study_plan(course_load, parsed_deadlines, preferences)
-        
-        if view == 'Dashboard':
-            dashboard_view(course_load, deadlines, preferences, study_plan, parsed_deadlines)
-        elif view == 'Combined':
-            combined_view(course_load, deadlines, preferences, study_plan, parsed_deadlines)
+        combined_view(course_load, parsed_deadlines, preferences, study_plan, parsed_deadlines)
     else:
         st.error('Please fill in all the fields.')
 
