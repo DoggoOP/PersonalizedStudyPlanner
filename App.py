@@ -17,13 +17,17 @@ cohere_client = cohere.Client(cohere_api_key)
 def generate_study_plan(course_load, deadlines, preferences):
     prompt = f"Generate a detailed study plan for the following courses: {course_load}. " \
              f"The deadlines are: {deadlines}. The study preferences are: {preferences}."
-    response = cohere_client.generate(
-        model='large',
-        prompt=prompt,
-        max_tokens=300,
-        temperature=0.7
-    )
-    return response.generations[0].text
+    try:
+        response = cohere_client.generate(
+            model='xlarge',
+            prompt=prompt,
+            max_tokens=300,
+            temperature=0.7
+        )
+        return response.generations[0].text
+    except cohere.errors.CohereError as e:
+        st.error(f"Error generating study plan: {e.message}")
+        return None
 
 # Function to parse deadlines
 def parse_deadlines(deadlines):
@@ -36,7 +40,7 @@ def parse_deadlines(deadlines):
 def send_notification(message):
     st.write(message)  # Placeholder for actual notification logic
 
-# Layout 1: Dashboard
+# Layout: Dashboard
 def dashboard_view(course_load, deadlines, preferences, study_plan, deadlines_data):
     st.subheader('📅 Weekly Calendar View')
     df = pd.DataFrame(deadlines_data)
@@ -81,7 +85,8 @@ if st.button('Generate Study Plan'):
         deadlines_text = "; ".join([f"{item['course']} by {item['date']}" for item in parsed_deadlines])
         study_plan = generate_study_plan(", ".join(course_load), deadlines_text, preferences)
         
-        dashboard_view(course_load, parsed_deadlines, preferences, study_plan, parsed_deadlines)
+        if study_plan:
+            dashboard_view(course_load, parsed_deadlines, preferences, study_plan, parsed_deadlines)
 
     else:
         st.error('Please fill in all the fields.')
