@@ -85,15 +85,18 @@ for i in range(st.session_state.deadline_count):
 st.header('📝 Input Your Information')
 preferences = st.text_area('Personal Preferences (e.g., study in the morning, prefer short sessions)', placeholder='Enter any study preferences')
 
-
+# User selects the view
+view = st.sidebar.selectbox('Select View', ['Dashboard', 'Combined'])
 
 if st.button('Generate Study Plan'):
-    if course and deadlines and preferences:
-        study_plan = generate_study_plan(course, parse_deadlines(deadlines), preferences)
-        deadlines_data = parse_deadlines(deadlines)
+    if course_load and deadlines and preferences:
+        parsed_deadlines = parse_deadlines(deadlines)
+        study_plan = generate_study_plan(course_load, parsed_deadlines, preferences)
         
-
-        combined_view(course, deadlines, preferences, study_plan, deadlines_data)
+        if view == 'Dashboard':
+            dashboard_view(course_load, deadlines, preferences, study_plan, parsed_deadlines)
+        elif view == 'Combined':
+            combined_view(course_load, deadlines, preferences, study_plan, parsed_deadlines)
     else:
         st.error('Please fill in all the fields.')
 
