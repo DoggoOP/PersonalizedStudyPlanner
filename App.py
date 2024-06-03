@@ -21,13 +21,9 @@ def generate_study_plan(course_load, deadlines, preferences):
 
 # Function to parse deadlines
 def parse_deadlines(deadlines):
-    deadlines_list = [d.split(':') for d in deadlines.split(',')]
     parsed_deadlines = []
-    for d in deadlines_list:
-        if len(d) == 2:
-            parsed_deadlines.append({'course': d[0].strip(), 'date': d[1].strip()})
-        else:
-            st.warning(f"Invalid deadline format: {d}. Expected format: 'Course: YYYY-MM-DD'")
+    for deadline in deadlines:
+        parsed_deadlines.append({'course': deadline['course'], 'date': deadline['date'].strftime('%Y-%m-%d')})
     return parsed_deadlines
 
 # Function to send notification
@@ -73,12 +69,29 @@ view = st.sidebar.selectbox('Select View', ['Dashboard', 'Combined'])
 # Input fields
 st.header('📝 Input Your Information')
 course_load = st.text_area('Course Load (e.g., Math, Physics, Chemistry)', placeholder='Enter your courses separated by commas')
-deadlines = st.text_area('Deadlines (e.g., Math: 2023-05-25, Physics: 2023-05-30)', placeholder='Enter your deadlines in the format Course: YYYY-MM-DD')
 preferences = st.text_area('Personal Preferences (e.g., study in the morning, prefer short sessions)', placeholder='Enter any study preferences')
+
+# Adding tasks dynamically
+st.header('🗓️ Add Your Deadlines')
+deadlines = []
+if 'deadline_count' not in st.session_state:
+    st.session_state.deadline_count = 0
+
+def add_deadline():
+    st.session_state.deadline_count += 1
+
+st.button('Add Deadline', on_click=add_deadline)
+
+for i in range(st.session_state.deadline_count):
+    with st.expander(f'Deadline {i+1}'):
+        course = st.text_input(f'Course Name {i+1}', key=f'course_{i}')
+        date = st.date_input(f'Deadline Date {i+1}', key=f'date_{i}')
+        if course and date:
+            deadlines.append({'course': course, 'date': date})
 
 if st.button('Generate Study Plan'):
     if course_load and deadlines and preferences:
-        study_plan = generate_study_plan(course_load, deadlines, preferences)
+        study_plan = generate_study_plan(course_load, parse_deadlines(deadlines), preferences)
         deadlines_data = parse_deadlines(deadlines)
         
         if view == 'Dashboard':
@@ -88,3 +101,5 @@ if st.button('Generate Study Plan'):
     else:
         st.error('Please fill in all the fields.')
 
+# Footer with more info
+st.markdown('---')
