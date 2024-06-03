@@ -56,8 +56,14 @@ def combined_view(course_load, deadlines, preferences, study_plan, deadlines_dat
         st.write(f"{course}: {date} ({days_left} days left)")
     
     st.write('## Checklist')
-    for deadline in deadlines_data:
-        st.checkbox(f"{deadline['course']}: {deadline['date']}")
+    for idx, deadline in enumerate(deadlines_data):
+        col1, col2 = st.columns([4, 1])
+        with col1:
+            st.checkbox(f"{deadline['course']}: {deadline['date']}", key=f'checkbox_{idx}')
+        with col2:
+            if st.button('Delete', key=f'delete_{idx}'):
+                del st.session_state.deadlines[idx]
+                st.experimental_rerun()
 
 # Main app layout
 st.title('📚 Personalized Study Planner')
@@ -65,30 +71,31 @@ st.write('Generate a personalized study plan based on your courses, deadlines, a
 
 # Adding courses and deadlines dynamically
 st.header('🗓️ Add Your Courses and Deadlines')
-courses_and_deadlines = []
-if 'course_count' not in st.session_state:
-    st.session_state.course_count = 0
+
+if 'deadlines' not in st.session_state:
+    st.session_state.deadlines = []
 
 def add_course():
-    st.session_state.course_count += 1
+    st.session_state.deadlines.append({'course': '', 'date': datetime.date.today()})
 
 st.button('Add Course', on_click=add_course)
 
-for i in range(st.session_state.course_count):
-    with st.expander(f'Course {i+1}'):
-        course = st.text_input(f'Course Name {i+1}', key=f'course_{i}')
-        date = st.date_input(f'Deadline Date {i+1}', key=f'date_{i}')
-        if course and date:
-            courses_and_deadlines.append({'course': course, 'date': date})
+for idx, deadline in enumerate(st.session_state.deadlines):
+    with st.expander(f'Course {idx+1}'):
+        course = st.text_input(f'Course Name {idx+1}', key=f'course_{idx}', value=deadline['course'])
+        date = st.date_input(f'Deadline Date {idx+1}', key=f'date_{idx}', value=deadline['date'])
+        st.session_state.deadlines[idx]['course'] = course
+        st.session_state.deadlines[idx]['date'] = date
 
 # Input fields
 st.header('📝 Input Your Study Preferences')
 preferences = st.text_area('Personal Preferences (e.g., study in the morning, prefer short sessions)', placeholder='Enter any study preferences')
 
+
 if st.button('Generate Study Plan'):
-    if courses_and_deadlines and preferences:
-        course_load = [item['course'] for item in courses_and_deadlines]
-        parsed_deadlines = parse_deadlines(courses_and_deadlines)
+    if st.session_state.deadlines and preferences:
+        course_load = [item['course'] for item in st.session_state.deadlines]
+        parsed_deadlines = parse_deadlines(st.session_state.deadlines)
         study_plan = generate_study_plan(course_load, parsed_deadlines, preferences)
         combined_view(course_load, parsed_deadlines, preferences, study_plan, parsed_deadlines)
     else:
