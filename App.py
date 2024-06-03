@@ -44,7 +44,7 @@ def dashboard_view(course_load, deadlines, preferences, study_plan, deadlines_da
     st.subheader('📝 Study Plan Summary')
     st.write(study_plan)
 
-# Layout 3: Combined View
+# Layout 2: Combined View
 def combined_view(course_load, deadlines, preferences, study_plan, deadlines_data):
     st.subheader('🔄 Visual Timeline and Checklist')
 
@@ -91,16 +91,21 @@ for idx, deadline in enumerate(st.session_state.deadlines):
 st.header('📝 Input Your Study Preferences')
 preferences = st.text_area('Personal Preferences (e.g., study in the morning, prefer short sessions)', placeholder='Enter any study preferences')
 
+# User selects the view
+view = st.radio('Select View', ['Dashboard', 'Combined'])
 
 if st.button('Generate Study Plan'):
     if st.session_state.deadlines and preferences:
         course_load = [item['course'] for item in st.session_state.deadlines]
         parsed_deadlines = parse_deadlines(st.session_state.deadlines)
         study_plan = generate_study_plan(course_load, parsed_deadlines, preferences)
-        combined_view(course_load, parsed_deadlines, preferences, study_plan, parsed_deadlines)
+        
+        if view == 'Dashboard':
+            dashboard_view(course_load, parsed_deadlines, preferences, study_plan, parsed_deadlines)
+        elif view == 'Combined':
+            combined_view(course_load, parsed_deadlines, preferences, study_plan, parsed_deadlines)
     else:
         st.error('Please fill in all the fields.')
 
 # Footer with more info
 st.markdown('---')
-
