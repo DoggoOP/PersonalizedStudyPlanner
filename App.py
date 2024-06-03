@@ -19,14 +19,14 @@ def generate_study_plan(course_load, deadlines, preferences):
              f"The deadlines are: {deadlines}. The study preferences are: {preferences}."
     try:
         response = cohere_client.generate(
-            model='xlarge',
+            model='command-xlarge-nightly',
             prompt=prompt,
             max_tokens=300,
             temperature=0.7
         )
         return response.generations[0].text
-    except cohere.errors.CohereError as e:
-        st.error(f"Error generating study plan: {e.message}")
+    except Exception as e:
+        st.error(f"Error generating study plan: {e}")
         return None
 
 # Function to parse deadlines
@@ -77,7 +77,6 @@ for idx, deadline in enumerate(st.session_state.deadlines):
 st.header('📝 Input Your Study Preferences')
 preferences = st.text_area('Personal Preferences (e.g., study in the morning, prefer short sessions)', placeholder='Enter any study preferences')
 
-
 if st.button('Generate Study Plan'):
     if st.session_state.deadlines and preferences:
         course_load = [item['course'] for item in st.session_state.deadlines]
@@ -87,7 +86,6 @@ if st.button('Generate Study Plan'):
         
         if study_plan:
             dashboard_view(course_load, parsed_deadlines, preferences, study_plan, parsed_deadlines)
-
     else:
         st.error('Please fill in all the fields.')
 
